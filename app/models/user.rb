@@ -33,14 +33,25 @@ class User < ActiveRecord::Base
   end
 
   def self.authenticate(email, attempt_pw)
-      user = find_by_email(email)
-      if user.nil? then
-        nil
-      elsif user.correct_password?(attempt_pw) then
-        user
-      else
-        nil
-      end
+    user = find_by_email(email)
+    if user.nil?
+      nil
+    elsif user.correct_password?(attempt_pw)
+      user
+    else
+      nil
+    end
+  end
+
+  def self.authenticate_with_salt(id, cookie_salt)
+    user = find_by_id(id)
+    if user.nil?
+      nil
+    elsif user.salt == cookie_salt
+      user
+    else
+      nil
+    end
   end
 
   private
