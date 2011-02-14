@@ -11,13 +11,55 @@
 #
 
 class User < ActiveRecord::Base
-  attr_accessible :name, :email
+  attr_accessor :password
+  attr_accessible :name, :email, :password, :password_confirmation
 
   email_cool = /\A[\w]+(\.[\w]+)*@[a-z]+(\.([a-z]+))+\z/i
 
-  validates :name, :presence => true, :length => { :maximum => 50}
-  validates :email, :presence => true,
-            :format => { :with => email_cool },
-            :uniqueness => { :case_sensitive => false }
+  validates :name,      :presence => true,
+                        :length => { :maximum => 50}
+  validates :email,     :presence => true,
+                        :format => { :with => email_cool },
+                        :uniqueness => { :case_sensitive => false }
+  validates :password,  :presence => true,
+                        :confirmation => true,
+                        :length => { :within => 6..30 }
+
+  before_save :encrypt_password
+
+
+  def correct_password?(attempt_pw)
+    encrypted_password == encrypt(attempt_pw)
+  end
+
+  def self.authenticate(email, attempt_pw)
+      user = find_by_email(email)
+      if user.nil? then
+        nil
+      elsif user.correct_password?(attempt_pw) then
+        user
+      else
+        nil
+      end
+  end
+
+  private
+    def encrypt_password
+      self.salt = make_salt if new_record?
+      self.encrypted_password = encrypt(password)
+    end
+
+    def encrypt(string)
+      secure_hash("#{salt}--#{string}")
+    end
+
+    def make_salt
+      secure_hash("#{Time.now.utc}--#{password}")
+    end
+
+    def secure_hash(string)
+      Digest::SHA2.hexdigest(string)
+    end
+
 end
 
