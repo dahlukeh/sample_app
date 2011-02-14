@@ -5,3 +5,12 @@ Factory.define :user do |user|
   user.password_confirmation "foobar"
 end
 
+Factory.sequence :email do |n|
+  "person_#{n}@example.com"
+end
+
+Factory.define :micropost do |micropost|
+  micropost.content "Some message, perhaps important!"
+  micropost.association :user
+end
+

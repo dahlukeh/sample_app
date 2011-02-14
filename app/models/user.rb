@@ -14,6 +14,8 @@ class User < ActiveRecord::Base
   attr_accessor :password
   attr_accessible :name, :email, :password, :password_confirmation
 
+  has_many :microposts
+
   email_cool = /\A[\w]+(\.[\w]+)*@[a-z]+(\.([a-z]+))+\z/i
 
   validates :name,      :presence => true,
