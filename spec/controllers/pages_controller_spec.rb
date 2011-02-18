@@ -17,6 +17,31 @@ describe PagesController do
       get 'home'
       response.should have_selector("title", :content => @base_title + " | Home")
     end
+
+    describe "if signed in" do
+      before(:each) do
+        @user = Factory(:user)
+        test_sign_in(@user)
+      end
+
+      it "should have a place to create a new micropost" do
+        get :home
+        response.should have_selector("form.new_micropost", :method => "post")
+      end
+
+      it "should have a sidebar" do
+        get :home
+        response.should have_selector("td", :class => "sidebar round")
+      end
+
+      it "should have a sidebar with correct micropost count" do
+        correct_text = "#{@user.microposts.count} micropost"
+        correct_text += "s" unless @user.microposts.count == 1
+
+        get :home
+        response.should have_selector("span.microposts", :content => correct_text)
+      end
+    end
   end
 
   describe "GET 'contact'" do
